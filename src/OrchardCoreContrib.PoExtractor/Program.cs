@@ -34,6 +34,24 @@ public class Program
         );
         var ignoredProjects = app.Option("-i|--ignore <IGNORED_PROJECTS>", "Ignores extracting PO files from a given project(s).", CommandOptionType.MultipleValue);
         var localizers = app.Option("--localizer <LOCALIZERS>", "Specifies the name of the localizer(s) that will be used during the extraction process.", CommandOptionType.MultipleValue);
+        var methodCalls = app.Option("--method-call <METHOD_CALL_WITH_ARGUMENT_INDEX>", "Specifies method calls and the position of the argument that should be extracted as a localizable string. " +
+            "The format is 'METHOD_CALL:argument_position_index', where METHOD_CALL is the method name including and class name, " +
+            "and argument_position_index is a zero-based index of the argument to extract. You can have multiple of this switch in a call. Example: Validation.Throw:0", CommandOptionType.MultipleValue, option =>
+        {
+            option.OnValidate(_ =>
+            {
+                foreach (var value in option.Values)
+                {
+                    var parts = value.Split(':');
+                    if (parts.Length != 2 || !int.TryParse(parts[1], out int _))
+                    {
+                        return new ValidationResult("Method call must be in the format 'METHOD_CALL:argument_position_index'.");
+                    }
+                }
+
+                return ValidationResult.Success;
+            });
+        });
         var single = app.Option("-s|--single <FILE_NAME>", "Specifies the single output file.", CommandOptionType.SingleValue);
         var plugins = app.Option(
             "-p|--plugin <FILE_NAME_OR_HTTPS_URL>",
@@ -63,6 +81,18 @@ public class Program
             if (localizers.Values.Count > 0)
             {
                 LocalizerAccessors.LocalizerIdentifiers = [.. localizers.Values];
+            }
+
+            if (methodCalls.Values.Count > 0)
+            {
+                foreach (var methodCall in methodCalls.Values)
+                {
+                    var parts = methodCall.Split(':');
+                    var methodName = parts[0];
+                    var argumentPositionIndex = int.Parse(parts[1]);
+
+                    MethodInvokerExtractor.MethodArgumentPositions[methodName] = argumentPositionIndex;
+                }
             }
 
             var projectFiles = new List<string>();
@@ -112,7 +142,7 @@ public class Program
                 var projectBasePath = Path.GetDirectoryName(projectPath) + Path.DirectorySeparatorChar;
                 var projectRelativePath = projectPath[projectBasePath.Length..];
                 var rootedProject = projectPath == inputPath.Value
-                    ? projectPath 
+                    ? projectPath
                     : projectPath[(projectPath.IndexOf(inputPath.Value, StringComparison.Ordinal) + inputPath.Value.Length + 1)..];
                 if (IgnoredProject.ToList().Any(p => rootedProject.StartsWith(p)))
                 {

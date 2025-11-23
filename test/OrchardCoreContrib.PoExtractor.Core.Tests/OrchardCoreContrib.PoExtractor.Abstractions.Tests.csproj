@@ -21,5 +21,11 @@
 		<Compile Update="ProjectFiles\PersonModel.cs">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Compile>
+		<Compile Update="ProjectFiles\BusinessObject.cs">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Compile>
+		<Compile Update="ProjectFiles\Validation.cs">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Compile>
 	</ItemGroup>
 </Project>

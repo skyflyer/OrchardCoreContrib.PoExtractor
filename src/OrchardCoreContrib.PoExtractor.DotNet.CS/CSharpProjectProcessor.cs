@@ -37,7 +37,9 @@ public class CSharpProjectProcessor : IProjectProcessor
             new DisplayAttributeDescriptionStringExtractor(csharpMetadataProvider),
             new DisplayAttributeNameStringExtractor(csharpMetadataProvider),
             new DisplayAttributeGroupNameStringExtractor(csharpMetadataProvider),
-            new DisplayAttributeShortNameStringExtractor(csharpMetadataProvider)
+            new DisplayAttributeShortNameStringExtractor(csharpMetadataProvider),
+            new TranslatableAttributeStringExtractor(csharpMetadataProvider),
+            new MethodInvokerExtractor(csharpMetadataProvider),
         ], localizableStrings);
 
         foreach (var file in Directory.EnumerateFiles(path, $"*{_cSharpExtension}", SearchOption.AllDirectories).OrderBy(file => file))

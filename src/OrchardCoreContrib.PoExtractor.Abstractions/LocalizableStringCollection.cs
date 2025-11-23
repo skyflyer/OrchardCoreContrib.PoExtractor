@@ -31,6 +31,8 @@ public class LocalizableStringCollection
     {
         ArgumentNullException.ThrowIfNull(item);
 
+        // Remove context from translations
+        item.Context = null;
         var key = item.Context + item.Text;
         if (_values.TryGetValue(key, out var localizedString))
         {
